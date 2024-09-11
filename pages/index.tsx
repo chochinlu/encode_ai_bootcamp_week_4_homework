@@ -42,6 +42,7 @@ export default function Home() {
   const [story, setStory] = useState("");
   const [parsedStory, setParsedStory] = useState('');
   const answerContainerRef = useRef<HTMLDivElement>(null);
+  const storyContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (answer && answer !== "Running query...") {
@@ -77,6 +78,16 @@ export default function Home() {
       alert("Please upload a .txt file");
     }
   };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (story && storyContainerRef.current) {
+      storyContainerRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [story]);
 
   return (
     <>
@@ -288,75 +299,80 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <div className="my-2 flex h-1/4 flex-auto flex-col space-y-2">
-              {parsedAnswer && parsedAnswer.characters ? (
-                <div ref={answerContainerRef}>
-                  <div className="overflow-auto border rounded max-h-[400px]">
-                    <table className="w-full border-collapse text-sm">
-                      <thead className="sticky top-0 bg-blue-900">
-                        <tr>
-                          <th className="border p-2 text-left font-bold">Name</th>
-                          <th className="border p-2 text-left font-bold">Description</th>
-                          <th className="border p-2 text-left font-bold">Personality</th>
+            {parsedAnswer && parsedAnswer.characters ? (
+              <div ref={answerContainerRef}>
+                <div className="overflow-auto border rounded max-h-[400px]">
+                  <table className="w-full border-collapse text-sm">
+                    <thead className="sticky top-0 bg-blue-900">
+                      <tr>
+                        <th className="border p-2 text-left font-bold">Name</th>
+                        <th className="border p-2 text-left font-bold">Description</th>
+                        <th className="border p-2 text-left font-bold">Personality</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {parsedAnswer.characters.map((character: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border p-2">{character.name}</td>
+                          <td className="border p-2">{character.description}</td>
+                          <td className="border p-2">{character.personality}</td>
                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {parsedAnswer.characters.map((character: any, index: number) => (
-                          <tr key={index}>
-                            <td className="border p-2">{character.name}</td>
-                            <td className="border p-2">{character.description}</td>
-                            <td className="border p-2">{character.personality}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ) : (
-                <div className="flex-1 p-2 border rounded">{answer}</div>
-              )}
-            </div>
-            <div className="flex-1 p-2 ">
-              <Button
-                className="mt-4"
-                onClick={async () => {
-                  console.log('generate a new story');
-                  try {
-                    setStory("Generating a story...");
-                    const response = await fetch("/api/generateanewstory", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({
-                        answer: JSON.stringify(parsedAnswer),
-                        topK: parseInt(topK),
-                        temperature: parseFloat(temperature),
-                        topP: parseFloat(topP),
-                      }),
-                    });
+              </div>
+            ) : (
+              <div className="flex-1 p-2 border rounded">{answer}</div>
+            )}
+            {/* 將 Generate a Story 按鈕和相關內容移到這裡 */}
+            {parsedAnswer && parsedAnswer.characters && (
+              <div className="mt-4" ref={storyContainerRef}>
+                <Button
+                  onClick={async () => {
+                    console.log('generate a new story');
+                    try {
+                      setStory("Generating a story...");
+                      const response = await fetch("/api/generateanewstory", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          answer: JSON.stringify(parsedAnswer),
+                          topK: parseInt(topK),
+                          temperature: parseFloat(temperature),
+                          topP: parseFloat(topP),
+                        }),
+                      });
 
-                    const result = await response.json();
-                    console.log(result);
-                    if (result.error) {
-                      setStory(`Error: ${result.error}`);
-                    } else if (result.payload && result.payload.story) {
-                      setStory(result.payload.story);
-                    } else {
-                      setStory("Unable to generate story");
+                      const result = await response.json();
+                      console.log(result);
+                      if (result.error) {
+                        setStory(`Error: ${result.error}`);
+                      } else if (result.payload && result.payload.story) {
+                        setStory(result.payload.story);
+                      } else {
+                        setStory("Unable to generate story");
+                      }
+                    } catch (error) {
+                      setStory(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
                     }
-                  } catch (error) {
-                    setStory(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                  }
-                }}
-              >
-                Generate a Story
-              </Button>
-              <div
-                className="prose prose-invert max-w-none border rounded text-sm px-2 py-4 mt-4"
-                dangerouslySetInnerHTML={{ __html: marked.parse(story || '') }} />
-            </div>
+                  }}
+                >
+                  Generate a Story
+                </Button>
+                <div
+                  className="prose prose-invert max-w-none border rounded text-sm px-2 py-4 mt-4"
+                  dangerouslySetInnerHTML={{ __html: marked.parse(story || '') }}
+                />
+                {story && (
+                  <Button onClick={scrollToTop} className="mt-4">
+                    Back To Top
+                  </Button>
+                )}
+              </div>
+            )}
           </>
         )}
       </main>
