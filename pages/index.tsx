@@ -74,7 +74,7 @@ export default function Home() {
       <Head>
         <title>LlamaIndex.TS Playground</title>
       </Head>
-      <main className="mx-2 flex h-full flex-col lg:mx-56">
+      <main className="mx-2 flex min-h-screen flex-col lg:mx-56 my-5">
         <div className="space-y-2">
           <Label>Settings:</Label>
           <div>
@@ -136,7 +136,7 @@ export default function Home() {
                 <Textarea
                   id={sourceId}
                   value={text}
-                  className="h-[20em] resize-none overflow-auto"
+                  className="h-[30em] resize-none overflow-auto"
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
                     setText(e.target.value);
                     setNeedsNewIndex(true);
@@ -283,7 +283,7 @@ export default function Home() {
               <Label htmlFor={answerId}>Answer:</Label>
               {parsedAnswer && parsedAnswer.characters ? (
                 <div className="overflow-auto border rounded">
-                  <table className="w-full border-collapse">
+                  <table className="w-full border-collapse text-sm">
                     <thead className="sticky top-0 bg-blue-900">
                       <tr>
                         <th className="border p-2 text-left font-bold">Name</th>
