@@ -19,7 +19,7 @@ export default function Home() {
   const answerId = useId();
   const queryId = useId();
   const sourceId = useId();
-  const [text, setText] = useState(essay);
+  const [text, setText] = useState("");
   const [query, setQuery] = useState("");
   const [needsNewIndex, setNeedsNewIndex] = useState(true);
   const [buildingIndex, setBuildingIndex] = useState(false);
@@ -37,6 +37,7 @@ export default function Home() {
   const [topP, setTopP] = useState(DEFAULT_TOP_P.toString());
   const [answer, setAnswer] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [indexStatus, setIndexStatus] = useState("");
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -98,12 +99,12 @@ export default function Home() {
             />
           </div>
         </div>
-        <div className="my-2 flex h-3/4 flex-auto flex-col space-y-2">
+        <div className="my-2 flex flex-auto flex-col space-y-2">
           <div className="flex items-center space-x-2">
             <Button
               onClick={() => fileInputRef.current?.click()}
             >
-              上傳文字檔案
+              Upload Text File
             </Button>
             <input
               type="file"
@@ -113,52 +114,62 @@ export default function Home() {
               className="hidden"
             />
           </div>
-          <Label htmlFor={sourceId}>Source text:</Label>
-          <Textarea
-            id={sourceId}
-            value={text}
-            className="flex-1"
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
-              setText(e.target.value);
-              setNeedsNewIndex(true);
-            }}
-          />
+          {text && (
+            <>
+              <Label htmlFor={sourceId}>Source text:</Label>
+              <div className="relative">
+                <Textarea
+                  id={sourceId}
+                  value={text}
+                  className="h-[20em] resize-none overflow-auto"
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+                    setText(e.target.value);
+                    setNeedsNewIndex(true);
+                  }}
+                />
+              </div>
+              <Button
+                disabled={!needsNewIndex || buildingIndex || runningQuery}
+                onClick={async () => {
+                  setIndexStatus("Building index...");
+                  setBuildingIndex(true);
+                  setNeedsNewIndex(false);
+                  // Post the text and settings to the server
+                  const result = await fetch("/api/splitandembed", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      document: text,
+                      chunkSize: parseInt(chunkSize),
+                      chunkOverlap: parseInt(chunkOverlap),
+                    }),
+                  });
+                  const { error, payload } = await result.json();
+
+                  if (error) {
+                    setIndexStatus(`Error: ${error}`);
+                  }
+
+                  if (payload) {
+                    setNodesWithEmbedding(payload.nodesWithEmbedding);
+                    setIndexStatus("Index built successfully!");
+                  }
+
+                  setBuildingIndex(false);
+                }}
+              >
+                {buildingIndex ? "Building Vector index..." : "Build index"}
+              </Button>
+              {indexStatus && (
+                <div className="mt-2 text-sm font-medium text-gray-700">
+                  {indexStatus}
+                </div>
+              )}
+            </>
+          )}
         </div>
-        <Button
-          disabled={!needsNewIndex || buildingIndex || runningQuery}
-          onClick={async () => {
-            setAnswer("Building index...");
-            setBuildingIndex(true);
-            setNeedsNewIndex(false);
-            // Post the text and settings to the server
-            const result = await fetch("/api/splitandembed", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                document: text,
-                chunkSize: parseInt(chunkSize),
-                chunkOverlap: parseInt(chunkOverlap),
-              }),
-            });
-            const { error, payload } = await result.json();
-
-            if (error) {
-              setAnswer(error);
-            }
-
-            if (payload) {
-              setNodesWithEmbedding(payload.nodesWithEmbedding);
-              setAnswer("Index built!");
-            }
-
-            setBuildingIndex(false);
-          }}
-        >
-          {buildingIndex ? "Building Vector index..." : "Build index"}
-        </Button>
-
         {!buildingIndex && !needsNewIndex && !runningQuery && (
           <>
             <LinkedSlider
