@@ -39,6 +39,7 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [indexStatus, setIndexStatus] = useState("");
   const [parsedAnswer, setParsedAnswer] = useState<any>(null);
+  const answerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (answer && answer !== "Running query...") {
@@ -53,6 +54,12 @@ export default function Home() {
       setParsedAnswer(null);
     }
   }, [answer]);
+
+  useEffect(() => {
+    if (parsedAnswer && parsedAnswer.characters && answerContainerRef.current) {
+      answerContainerRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [parsedAnswer]);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -280,27 +287,37 @@ export default function Home() {
               </div>
             </div>
             <div className="my-2 flex h-1/4 flex-auto flex-col space-y-2">
-              <Label htmlFor={answerId}>Answer:</Label>
               {parsedAnswer && parsedAnswer.characters ? (
-                <div className="overflow-auto border rounded">
-                  <table className="w-full border-collapse text-sm">
-                    <thead className="sticky top-0 bg-blue-900">
-                      <tr>
-                        <th className="border p-2 text-left font-bold">Name</th>
-                        <th className="border p-2 text-left font-bold">Description</th>
-                        <th className="border p-2 text-left font-bold">Personality</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {parsedAnswer.characters.map((character: any, index: number) => (
-                        <tr key={index}>
-                          <td className="border p-2">{character.name}</td>
-                          <td className="border p-2">{character.description}</td>
-                          <td className="border p-2">{character.personality}</td>
+                <div ref={answerContainerRef}>
+                  <div className="overflow-auto border rounded max-h-[400px]">
+                    <table className="w-full border-collapse text-sm">
+                      <thead className="sticky top-0 bg-blue-900">
+                        <tr>
+                          <th className="border p-2 text-left font-bold">Name</th>
+                          <th className="border p-2 text-left font-bold">Description</th>
+                          <th className="border p-2 text-left font-bold">Personality</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {parsedAnswer.characters.map((character: any, index: number) => (
+                          <tr key={index}>
+                            <td className="border p-2">{character.name}</td>
+                            <td className="border p-2">{character.description}</td>
+                            <td className="border p-2">{character.personality}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <Button
+                    className="mt-4"
+                    onClick={() => {
+                      // 這裡添加生成故事的邏輯
+                      console.log("Generate a story");
+                    }}
+                  >
+                    Generate a Story
+                  </Button>
                 </div>
               ) : (
                 <div className="flex-1 p-2 border rounded">{answer}</div>

@@ -18,3 +18,19 @@ Use the following JSON format for the list:
 
 Please return only plain text format, do not use markdown format.
 `
+
+export const tellingStoryPrompt = (characters: string) => {
+  return `
+You are a storyteller.
+
+You will be given a list of characters and a story.
+
+You need to tell a story with the following characters:
+
+###
+${characters}
+###
+
+Return in markdown format.
+`;
+};
