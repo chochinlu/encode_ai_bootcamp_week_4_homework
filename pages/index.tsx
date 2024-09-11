@@ -170,7 +170,7 @@ export default function Home() {
             </>
           )}
         </div>
-        {!buildingIndex && !needsNewIndex && !runningQuery && (
+        {!buildingIndex && !needsNewIndex && (
           <>
             <LinkedSlider
               className="my-2"

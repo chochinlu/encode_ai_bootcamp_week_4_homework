@@ -1,15 +1,17 @@
 export const SUMMARY_CHARACTERS_PROMPT = `
-列出所有文件中提到的角色的姓名, 描述與性格, 如果在文件中沒提及就說文件中沒有提及
-不需要總結
+List all characters mentioned in the document, including their names, descriptions, and personalities. If not mentioned in the document, state that it's not mentioned.
+No summary is needed.
 
-列出的格式使用JSON格式如下:
+Return in JSON format.
+
+Use the following JSON format for the list:
 
 {
   "characters": [
     {
-      "name": "角色名稱",
-      "description": "角色描述",
-      "personality": "角色性格"
+      "name": "Character name",
+      "description": "Character description",
+      "personality": "Character personality"
     }
   ]
 }
