@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { ChangeEvent, useId, useState, useRef, useEffect } from "react";
-
+import { marked } from 'marked';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,8 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [indexStatus, setIndexStatus] = useState("");
   const [parsedAnswer, setParsedAnswer] = useState<any>(null);
+  const [story, setStory] = useState("");
+  const [parsedStory, setParsedStory] = useState('');
   const answerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -309,19 +311,51 @@ export default function Home() {
                       </tbody>
                     </table>
                   </div>
-                  <Button
-                    className="mt-4"
-                    onClick={() => {
-                      // 這裡添加生成故事的邏輯
-                      console.log("Generate a story");
-                    }}
-                  >
-                    Generate a Story
-                  </Button>
+
                 </div>
               ) : (
                 <div className="flex-1 p-2 border rounded">{answer}</div>
               )}
+            </div>
+            <div className="flex-1 p-2 ">
+              <Button
+                className="mt-4"
+                onClick={async () => {
+                  console.log('generate a new story');
+                  try {
+                    setStory("Generating a story...");
+                    const response = await fetch("/api/generateanewstory", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        answer: JSON.stringify(parsedAnswer),
+                        topK: parseInt(topK),
+                        temperature: parseFloat(temperature),
+                        topP: parseFloat(topP),
+                      }),
+                    });
+
+                    const result = await response.json();
+                    console.log(result);
+                    if (result.error) {
+                      setStory(`Error: ${result.error}`);
+                    } else if (result.payload && result.payload.story) {
+                      setStory(result.payload.story);
+                    } else {
+                      setStory("Unable to generate story");
+                    }
+                  } catch (error) {
+                    setStory(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                  }
+                }}
+              >
+                Generate a Story
+              </Button>
+              <div
+                className="border rounded text-sm px-2 py-4"
+                dangerouslySetInnerHTML={{ __html: marked.parse(story || '') }} />
             </div>
           </>
         )}
