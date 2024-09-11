@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { ChangeEvent, useId, useState, useRef } from "react";
+import { ChangeEvent, useId, useState, useRef, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,21 @@ export default function Home() {
   const [answer, setAnswer] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [indexStatus, setIndexStatus] = useState("");
+  const [parsedAnswer, setParsedAnswer] = useState<any>(null);
+
+  useEffect(() => {
+    if (answer && answer !== "Running query...") {
+      try {
+        const parsed = JSON.parse(answer);
+        setParsedAnswer(parsed);
+      } catch (error) {
+        console.error('Cannot parse JSON:', error);
+        setParsedAnswer(null);
+      }
+    } else {
+      setParsedAnswer(null);
+    }
+  }, [answer]);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -254,6 +269,7 @@ export default function Home() {
 
                     if (payload) {
                       setAnswer(payload.response);
+                      // console.log(payload.response);
                     }
 
                     setRunningQuery(false);
@@ -265,12 +281,30 @@ export default function Home() {
             </div>
             <div className="my-2 flex h-1/4 flex-auto flex-col space-y-2">
               <Label htmlFor={answerId}>Answer:</Label>
-              <Textarea
-                className="flex-1"
-                readOnly
-                value={answer}
-                id={answerId}
-              />
+              {parsedAnswer && parsedAnswer.characters ? (
+                <div className="overflow-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="border p-2">Name</th>
+                        <th className="border p-2">Description</th>
+                        <th className="border p-2">Personality</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {parsedAnswer.characters.map((character: any, index: number) => (
+                        <tr key={index}>
+                          <td className="border p-2">{character.name}</td>
+                          <td className="border p-2">{character.description}</td>
+                          <td className="border p-2">{character.personality}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex-1 p-2 border rounded">{answer}</div>
+              )}
             </div>
           </>
         )}

@@ -15,4 +15,6 @@ Use the following JSON format for the list:
     }
   ]
 }
+
+Please return only plain text format, do not use markdown format.
 `
