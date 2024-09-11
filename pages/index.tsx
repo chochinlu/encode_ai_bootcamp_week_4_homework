@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { LinkedSlider } from "@/components/ui/linkedslider";
 import { Textarea } from "@/components/ui/textarea";
 import essay from "@/lib/essay";
+import { SUMMARY_CHARACTERS_PROMPT } from "@/prompts/prompts";
 
 const DEFAULT_CHUNK_SIZE = 1024;
 const DEFAULT_CHUNK_OVERLAP = 20;
@@ -213,13 +214,6 @@ export default function Home() {
             <div className="my-2 space-y-2">
               <Label htmlFor={queryId}>Query:</Label>
               <div className="flex w-full space-x-2">
-                <Input
-                  id={queryId}
-                  value={query}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    setQuery(e.target.value);
-                  }}
-                />
                 <Button
                   type="submit"
                   disabled={needsNewIndex || buildingIndex || runningQuery}
@@ -233,7 +227,7 @@ export default function Home() {
                         "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
-                        query,
+                        query: SUMMARY_CHARACTERS_PROMPT,
                         nodesWithEmbedding,
                         topK: parseInt(topK),
                         temperature: parseFloat(temperature),
@@ -254,7 +248,7 @@ export default function Home() {
                     setRunningQuery(false);
                   }}
                 >
-                  Submit
+                  Generate Characters Summary
                 </Button>
               </div>
             </div>
