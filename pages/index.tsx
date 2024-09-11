@@ -354,7 +354,7 @@ export default function Home() {
                 Generate a Story
               </Button>
               <div
-                className="border rounded text-sm px-2 py-4"
+                className="prose prose-invert max-w-none border rounded text-sm px-2 py-4 mt-4"
                 dangerouslySetInnerHTML={{ __html: marked.parse(story || '') }} />
             </div>
           </>
