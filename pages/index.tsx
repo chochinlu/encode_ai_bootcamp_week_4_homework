@@ -282,16 +282,16 @@ export default function Home() {
             <div className="my-2 flex h-1/4 flex-auto flex-col space-y-2">
               <Label htmlFor={answerId}>Answer:</Label>
               {parsedAnswer && parsedAnswer.characters ? (
-                <div className="overflow-auto">
+                <div className="overflow-auto border rounded">
                   <table className="w-full border-collapse">
-                    <thead>
+                    <thead className="sticky top-0 bg-blue-900">
                       <tr>
-                        <th className="border p-2">Name</th>
-                        <th className="border p-2">Description</th>
-                        <th className="border p-2">Personality</th>
+                        <th className="border p-2 text-left font-bold">Name</th>
+                        <th className="border p-2 text-left font-bold">Description</th>
+                        <th className="border p-2 text-left font-bold">Personality</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-200">
                       {parsedAnswer.characters.map((character: any, index: number) => (
                         <tr key={index}>
                           <td className="border p-2">{character.name}</td>
