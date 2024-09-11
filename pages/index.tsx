@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { ChangeEvent, useId, useState } from "react";
+import { ChangeEvent, useId, useState, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,22 @@ export default function Home() {
   );
   const [topP, setTopP] = useState(DEFAULT_TOP_P.toString());
   const [answer, setAnswer] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === "text/plain") {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setText(content);
+        setNeedsNewIndex(true);
+      };
+      reader.readAsText(file);
+    } else {
+      alert("Please upload a .txt file");
+    }
+  };
 
   return (
     <>
@@ -82,6 +98,20 @@ export default function Home() {
           </div>
         </div>
         <div className="my-2 flex h-3/4 flex-auto flex-col space-y-2">
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+            >
+              上傳文字檔案
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".txt"
+              className="hidden"
+            />
+          </div>
           <Label htmlFor={sourceId}>Source text:</Label>
           <Textarea
             id={sourceId}
